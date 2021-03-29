@@ -1,11 +1,24 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import Link from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useTranslation } from "next-i18next";
 
-export default function Home() {
-  const { t } = useTranslation(["common", "homepage"]);
+export default function Conditional() {
+  const { t } = useTranslation("common");
+  let user = undefined;
+
+  // server environment
+  if (typeof window === undefined) {
+    user = undefined;
+  } else {
+    const getData = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/posts/1");
+      const response = res.json();
+      return response;
+    };
+    user = getData();
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -14,10 +27,12 @@ export default function Home() {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>Primary Title: {t("primaryTitle")}</h1>
-        <Link href="/conditional">
-          <a className={styles.description}>{t("button")}</a>
-        </Link>
+        <h1 className={styles.title}>Conditionals</h1>
+        <h2>This is an inline ternary checking if user exists</h2>
+        {user ? t("one") : t("two")}
+        <br />
+        <h2>This is an inline ternary checking if user does NOT exist</h2>
+        {!user ? t("one") : t("two")}
       </main>
 
       <footer className={styles.footer}>
@@ -36,6 +51,6 @@ export default function Home() {
 
 export const getStaticProps = async ({ locale }) => ({
   props: {
-    ...(await serverSideTranslations(locale, ["common", "homepage"])),
+    ...(await serverSideTranslations(locale, ["common"])),
   },
 });
